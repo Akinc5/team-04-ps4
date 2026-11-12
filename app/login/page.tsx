@@ -26,30 +26,31 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <form onSubmit={handleSubmit} className="bento-card w-full max-w-sm p-6 sm:p-8">
-        <div className="mb-6 flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent)] text-lg font-black tracking-[-0.08em] text-[#15190f]">
-          d.
-        </div>
-        <p className="eyebrow mb-1">ZENTRIX SOFTWARE</p>
-        <h1 className="text-xl font-semibold tracking-tight">Welcome to DeskBot</h1>
-        <p className="muted mt-2 text-sm leading-6">Enter the team passcode to open the IT helpdesk.</p>
-        <input
-          type="password"
-          value={passcode}
-          onChange={(e) => setPasscode(e.target.value)}
-          className="dark-control mt-5 w-full px-3.5 py-3 text-sm outline-none transition focus:border-[#66734d]"
-          placeholder="Passcode"
-          aria-label="Team passcode"
-          autoFocus
-        />
-        {error && <p role="alert" className="mt-2 text-sm text-[var(--danger)]">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading || !passcode}
-          className="lime-button mt-4 w-full rounded-xl px-3 py-3 text-sm font-semibold"
-        >
-          {loading ? "Checking..." : "Continue →"}
+    <main className="login-screen">
+      <div className="login-grid" aria-hidden="true" />
+      <form onSubmit={handleSubmit} className="login-form">
+        <header className="login-header">
+          <h1>DESKBOT<br /><span>ACCESS</span></h1>
+        </header>
+
+        <label className="login-field">
+          <span>TEAM PASSCODE</span>
+          <input
+            type="password"
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+            placeholder="Enter passcode"
+            aria-label="Team passcode"
+            autoComplete="current-password"
+            autoFocus
+          />
+        </label>
+
+        {error && <p role="alert" className="login-error">{error}</p>}
+
+        <button type="submit" disabled={loading || !passcode} className="login-submit">
+          <span>{loading ? "VERIFYING ACCESS" : "INITIALIZE SESSION"}</span>
+          <span aria-hidden="true">↗</span>
         </button>
       </form>
     </main>
