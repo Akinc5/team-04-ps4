@@ -5,14 +5,24 @@ import type { AgentResult, AgentStep } from "@/lib/agent/types";
 
 type Message = { role: "user" | "model"; text: string; steps?: AgentStep[] };
 
-// YOUR JOB: change these sample prompts to match your problem statement.
+// One prompt for each thing the agent can do, including two that the rules refuse.
 const SAMPLE_PROMPTS = [
-  "Add a task to call the vendor tomorrow, then show all my tasks.",
-  "Which tasks are still open?",
-  "Mark the vendor call task as done.",
+  "My VPN keeps disconnecting since morning.",
+  "I clicked a strange link in an email.",
+  "What is the status of my laptop ticket?",
+  "Escalate my laptop battery ticket, it has been 3 days.",
+  "Reopen my Jira access ticket, I lost access again.",
+  "Are there any open P1 incidents right now?",
 ];
 
-export default function AgentChat({ onDataChanged }: { onDataChanged?: () => void }) {
+export default function AgentChat({
+  onDataChanged,
+  queuedPrompt,
+}: {
+  onDataChanged?: () => void;
+  /** A prompt sent from outside the chat, for example by clicking a ticket. */
+  queuedPrompt?: { text: string; n: number } | null;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,11 +61,34 @@ export default function AgentChat({ onDataChanged }: { onDataChanged?: () => voi
     }
   }
 
+  // Always points at the latest send(), so the effect below never uses stale messages.
+  const sendRef = useRef(send);
+  useEffect(() => {
+    sendRef.current = send;
+  });
+  useEffect(() => {
+    if (queuedPrompt) sendRef.current(queuedPrompt.text);
+  }, [queuedPrompt]);
+
   return (
     <div className="flex h-[70vh] flex-col rounded-xl border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-4 py-3">
-        <h2 className="font-semibold">Agent</h2>
-        <p className="text-xs text-slate-500">Ask in plain English. You can see every tool the agent uses.</p>
+      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+        <div>
+          <h2 className="font-semibold">Ask DeskBot</h2>
+          <p className="text-xs text-slate-500">Describe your IT problem. You can see every tool the agent uses.</p>
+        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={() => {
+              setMessages([]);
+              setError("");
+            }}
+            disabled={loading}
+            className="text-xs text-slate-500 hover:text-slate-900 disabled:opacity-50"
+          >
+            New chat
+          </button>
+        )}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -93,7 +126,7 @@ export default function AgentChat({ onDataChanged }: { onDataChanged?: () => voi
           </div>
         ))}
 
-        {loading && <p className="text-sm text-slate-500">Agent is working...</p>}
+        {loading && <p className="text-sm text-slate-500">DeskBot is working...</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <div ref={bottomRef} />
       </div>
@@ -108,7 +141,7 @@ export default function AgentChat({ onDataChanged }: { onDataChanged?: () => voi
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your request..."
+          placeholder="For example: my Outlook is not receiving emails"
           className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
         />
         <button

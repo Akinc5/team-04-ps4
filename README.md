@@ -1,108 +1,121 @@
-# SRM Agentic AI Hackathon: Starter Template
+# DeskBot: IT Helpdesk Ticket Agent
 
-This is the starting point for every team. It already has the setup done, so you can spend your time on your problem statement.
+Team 04 | PS4 | SRM Agentic AI Hackathon
 
-**Stack:** Next.js (App Router) · React · TypeScript · Tailwind CSS · Supabase PostgreSQL · Google Gemini API (function calling) · Zod · Vercel
+## The problem
 
-## What is already working
+Employees at Zentrix Software flood the IT team with simple tickets such as password resets and VPN issues. Most have known fixes, and the rest often go to the wrong team with the wrong priority.
 
-- A passcode login that protects your app and your Gemini quota
-- A Supabase connection (server side only)
-- A Gemini agent loop with function calling: Gemini picks a tool, Zod checks the arguments, your code runs it, and the result goes back to Gemini
-- 3 example tools on a `tasks` table: `listTasks` (reads), `createTask` (writes) and `completeTask` (writes)
-- A chat screen that shows every tool the agent used
-- An example REST API (`/api/tasks`) and a live data list
-- Seed data for all 6 problem statements in `seed/`
+## What our app does
 
-## Setup (about 30 minutes)
+- **Fixes first, tickets second:** the agent searches the knowledge base and gives the fix steps before it raises any ticket.
+- **Right priority and team, every time:** when a ticket is needed, code (not the model) sets the priority from `sla_rules` and routes it to the correct support team.
+- **Live SLA tracking:** every ticket shows whether it is on track, due soon or overdue against its SLA.
+- **Rules the agent cannot break:** no duplicate tickets, escalation only after a missed SLA, reopening only within 7 days, and employees see only their own tickets.
+- **IT Admin board:** IT staff see every ticket, worst SLA first, and change its status. The agent can also summarise open P1 incidents.
 
-1. **Create your team repo.** Click **Use this template** on GitHub and name it `team-<number>-ps<number>`.
-2. **Install.** Run `git clone <your repo>`, `cd` into it, and run `npm install`. You need Node.js 20 or later.
-3. **Create the database.** Create a project on [supabase.com](https://supabase.com). In **SQL Editor**, run `seed/00_starter_example.sql`, then the seed file for your problem.
-4. **Get the keys.**
-   - Supabase **Project Settings**: copy the Project URL and the secret (service_role) key
-   - [Google AI Studio](https://aistudio.google.com): click **Get API key**
-5. **Create `.env.local`.** Copy `.env.example` to `.env.local` and fill in all the values.
-6. **Run it.** Run `npm run dev`, open http://localhost:3000, enter your passcode and try a sample prompt.
-7. **Deploy.** On [vercel.com](https://vercel.com), import the repo, add the same environment variables, and deploy.
+## Live demo
 
-To check your settings, open `/api/health`. It shows which variables are missing (never their values).
+- Vercel link: <add your Vercel link>
+- Passcode: <add your passcode>
+- Try this prompt: "My VPN keeps disconnecting since morning." Then say "That did not work, I cannot work at all."
+
+More prompts to try:
+
+| Prompt | What happens |
+| --- | --- |
+| "I clicked a strange link in an email." | A P1 Security ticket is raised at once, with safety steps |
+| "What is the status of my laptop ticket?" | The agent finds ticket #1 and reports that it is past its SLA |
+| "Escalate my laptop battery ticket." | Allowed, because the SLA is missed: P3 becomes P2 |
+| "Escalate it again." | Refused: a ticket can be escalated only once |
+| "Reopen my Jira access ticket." | Refused: it was resolved more than 7 days ago |
+| "My battery is draining quickly, raise a ticket." | Refused as a duplicate of ticket #1 |
+| "Are there any open P1 incidents right now?" | The agent summarises open P1 tickets across the company |
+
+Run `seed/ps4_it_helpdesk.sql` again in the Supabase SQL Editor to reset the data before a demo.
+
+## Agent tools
+
+| Tool | What it does | Reads or writes |
+| --- | --- | --- |
+| `searchKnowledgeBase` | Finds up to 3 help articles that match the problem | Reads |
+| `getMyTickets` | Lists the employee's tickets with SLA status | Reads |
+| `getTicketStatus` | Full description, history and deadlines of one ticket | Reads |
+| `getOpenIncidents` | Open P1 tickets across the company, without names | Reads |
+| `getMyProfile` | Employee details, support teams and SLA times | Reads |
+| `createTicket` | Raises a ticket; code picks the priority and team | Writes |
+| `updateTicket` | Adds information, cancels, confirms a fix or reopens | Writes |
+| `escalateTicket` | Raises the priority when the SLA is missed | Writes |
+
+Gemini chooses the tool by itself from the user's plain-English message. Every tool's arguments are checked with Zod before it runs, and every tool call is shown in the chat.
+
+## Business rules
+
+These are checked in code (`lib/helpdesk.ts` and `lib/agent/tools.ts`), not only in the prompt.
+
+- **Priority** follows `sla_rules`: many users blocked or a security issue is P1, one user fully blocked is P2, work slowed is P3, a request is P4.
+- **Team** comes from the category, for example VPN goes to Network & VPN.
+- **No duplicates:** a new ticket is refused if the employee has an active ticket in the same category with a similar title.
+- **Limit:** at most 5 active tickets per employee.
+- **Ownership:** employees can only see and change their own tickets.
+- **Escalation:** only when the SLA is missed, only once per ticket, and never above P2.
+- **Reopen:** only within 7 days of the ticket being resolved or closed.
+- **Security tickets** cannot be cancelled by the employee.
+- The SLA clock counts calendar hours from when the ticket was created, and pauses while IT waits for the employee.
+
+## Pages
+
+| Page | Path | What it shows |
+| --- | --- | --- |
+| Helpdesk chat and My Tickets | `/` | The agent chat, with the employee's tickets and SLA status beside it |
+| IT Admin board | `/admin` | Every ticket in the company; IT staff change the status here |
+
+## Database tables
+
+- `employees`: staff of Zentrix Software, with department, location and laptop model.
+- `support_teams`: the five IT teams and what each one handles.
+- `kb_articles`: 30 help articles with step-by-step fixes.
+- `tickets`: every ticket, with category, priority, team, status and timestamps.
+- `sla_rules`: response and resolve hours for each priority, P1 to P4.
+
+## Tech stack
+
+Next.js, React, TypeScript, Tailwind CSS, Supabase, Gemini API (function calling), Zod, Vercel
+
+## Team
+
+| Name | Role |
+| --- | --- |
+| <name> | Team Lead |
+| <name> | Frontend |
+| <name> | Backend / API |
+| <name> | Database |
+| <name> | AI / Agent |
+
+## Run it locally
+
+1. `npm install`
+2. Copy `.env.example` to `.env.local` and fill in the keys
+3. Run `seed/ps4_it_helpdesk.sql` in the Supabase SQL Editor
+4. `npm run dev`
 
 ## Folder guide
 
 ```
 app/
-  page.tsx               Home page: agent chat + data list   <- change
-  login/page.tsx         Passcode page
-  api/agent/route.ts     POST /api/agent: runs the agent
-  api/tasks/route.ts     Example REST API                    <- copy for your tables
-  api/health/route.ts    Shows which settings are missing
+  page.tsx                    Helpdesk chat + My Tickets
+  admin/page.tsx              IT Admin board
+  api/agent/route.ts          POST /api/agent: runs the agent
+  api/tickets/route.ts        GET the employee's tickets
+  api/admin/tickets/route.ts  GET all tickets, PATCH a ticket's status
 components/
-  AgentChat.tsx          Chat UI that shows tool calls       <- change the sample prompts
-  TaskList.tsx           Example data list                   <- replace with your data
+  AgentChat.tsx               Chat UI that shows every tool call
+  TicketBoard.tsx             My Tickets panel with SLA status
+  AppHeader.tsx               Header and navigation
 lib/
-  agent/tools.ts         THE AGENT TOOLS                     <- your main work
-  agent/systemPrompt.ts  Instructions for Gemini             <- rewrite for your problem
-  agent/runAgent.ts      The agent loop (max 5 rounds)
-  agent/defineTool.ts    Turns Zod schemas into Gemini tool declarations
-  supabase.ts            Server-side Supabase client
-  schemas.ts             Shared Zod schemas
-proxy.ts                 Passcode gate for every page and API
-seed/                    SQL seed data for each problem statement
+  helpdesk.ts                 Business rules: priority, team, SLA, duplicates
+  agent/tools.ts              The 8 agent tools
+  agent/systemPrompt.ts       Instructions for Gemini
+  agent/runAgent.ts           The agent loop (max 5 rounds, with a fallback model)
+seed/ps4_it_helpdesk.sql      Seed data
 ```
-
-## How to add a tool (the main hackathon work)
-
-Open `lib/agent/tools.ts` and copy this pattern:
-
-```ts
-const createReturnRequest = defineTool({
-  name: "createReturnRequest",
-  description: "Use this when the customer wants to return a product from a delivered order.",
-  writes: true,
-  schema: z.object({
-    order_id: z.number().int().describe("The order number, for example 1007"),
-    product_id: z.string().describe("The product id, for example P101"),
-    reason: z.string().min(3).describe("Why the customer is returning it"),
-  }),
-  run: async ({ order_id, product_id, reason }) => {
-    // 1. Check your business rule (for example the return window)
-    // 2. Read or write Supabase
-    // 3. Return a small, clean object, or throw new Error("clear message")
-  },
-});
-
-export const tools: AgentTool[] = [createReturnRequest /*, more tools */];
-```
-
-Good tools:
-
-- Have a description that starts with "Use this when..."
-- Describe every field and its format, for example "YYYY-MM-DD"
-- Check business rules in code, not only in the prompt
-- Return small objects that Gemini can read easily
-- Throw clear errors, which the agent then explains to the user
-
-Then rewrite `lib/agent/systemPrompt.ts`. Name the business user, the logged-in user id (for example `C001`), your business rules and when to use each tool.
-
-## Rules to remember
-
-- Never commit `.env.local`. It is already in `.gitignore`.
-- Never use `SUPABASE_SECRET_KEY` in frontend code. Only files under `lib/` and `app/api/` may use it.
-- Do not change the core stack.
-- Before you push, run `npm run build`. If it fails on your laptop, it will fail on Vercel too.
-
-## Seed files
-
-| File | Problem |
-| --- | --- |
-| `00_starter_example.sql` | Example `tasks` table (run first) |
-| `demo_eventease.sql` | Day 1 lab: EventEase campus events |
-| `ps1_ecommerce_support.sql` | PS1 E-commerce Customer Support Agent |
-| `ps2_inventory_restock.sql` | PS2 Inventory Restock Agent |
-| `ps3_clinic_appointments.sql` | PS3 Clinic Appointment Agent |
-| `ps4_it_helpdesk.sql` | PS4 IT Helpdesk Ticket Agent |
-| `ps5_expense_claims.sql` | PS5 Expense Claim Assistant |
-| `ps6_job_match.sql` | PS6 Job Match Agent |
-
-All dates in the seed data are relative to today, so the data is always fresh. All names, companies and records are made up. You can run a seed file again at any time to reset your data.

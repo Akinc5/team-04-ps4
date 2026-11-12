@@ -1,7 +1,7 @@
 import "server-only";
 import type { Content, Part } from "@google/genai";
 import { getGemini } from "../gemini";
-import { GEMINI_MODEL } from "../env";
+import { GEMINI_FALLBACK_MODEL, GEMINI_MODEL } from "../env";
 import type { ChatMessage } from "../schemas";
 import { tools } from "./tools";
 import { toFunctionDeclarations } from "./defineTool";
@@ -29,15 +29,19 @@ export async function runAgent(messages: ChatMessage[]): Promise<AgentResult> {
   }));
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents,
-      config: {
-        systemInstruction: buildSystemPrompt(),
-        tools: [{ functionDeclarations }],
-        temperature: 0.2,
-      },
-    });
+    const response = await generate((model) =>
+      ai.models.generateContent({
+        model,
+        contents,
+        config: {
+          systemInstruction: buildSystemPrompt(),
+          tools: [{ functionDeclarations }],
+          temperature: 0.2,
+          // Give up on a stuck call instead of hanging until Vercel kills the request.
+          httpOptions: { timeout: 20_000 },
+        },
+      })
+    );
 
     const calls = response.functionCalls ?? [];
 
@@ -69,6 +73,30 @@ export async function runAgent(messages: ChatMessage[]): Promise<AgentResult> {
     reply: "I needed too many steps for this request. Please try a simpler or more specific question.",
     steps,
   };
+}
+
+// Overloaded, too slow, or out of free-tier quota: all are reasons to switch model.
+const BUSY = /429|503|504|UNAVAILABLE|DEADLINE_EXCEEDED|RESOURCE_EXHAUSTED|quota|overloaded|high demand|timeout|timed out|abort/i;
+
+/** While the main model is overloaded, requests go straight to the fallback model until this time. */
+let mainModelBusyUntil = 0;
+
+/**
+ * Gemini sometimes answers 503 "high demand", hangs, or runs out of free-tier quota.
+ * That is not our bug, so the call is tried again on the fallback model instead of
+ * failing the user's request.
+ */
+async function generate<T>(call: (model: string) => Promise<T>): Promise<T> {
+  if (Date.now() < mainModelBusyUntil) return call(GEMINI_FALLBACK_MODEL);
+  try {
+    return await call(GEMINI_MODEL);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!BUSY.test(message) || GEMINI_FALLBACK_MODEL === GEMINI_MODEL) throw err;
+    console.warn(`[agent] ${GEMINI_MODEL} is busy or out of quota, using ${GEMINI_FALLBACK_MODEL} for the next 5 minutes`);
+    mainModelBusyUntil = Date.now() + 5 * 60 * 1000;
+    return call(GEMINI_FALLBACK_MODEL);
+  }
 }
 
 async function runTool(name: string, rawArgs: unknown): Promise<AgentStep> {

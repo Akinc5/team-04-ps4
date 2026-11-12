@@ -15,3 +15,6 @@ export function requireEnv(name: string): string {
 }
 
 export const GEMINI_MODEL = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+
+/** Used automatically when GEMINI_MODEL is overloaded, too slow, or out of free-tier quota. */
+export const GEMINI_FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL?.trim() || "gemini-3.5-flash-lite";

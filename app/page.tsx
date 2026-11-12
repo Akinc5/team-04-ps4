@@ -2,40 +2,29 @@
 
 import { useState } from "react";
 import AgentChat from "@/components/AgentChat";
-import TaskList from "@/components/TaskList";
+import AppHeader from "@/components/AppHeader";
+import TicketBoard from "@/components/TicketBoard";
 
 /*
  * HOME PAGE
- * Left: the agent chat. Right: the data the agent works on (here: tasks).
- * YOUR JOB: replace TaskList with your own data view (orders, tickets, claims, ...)
- * and add more pages under app/ (for example app/orders/page.tsx).
+ * Left: DeskBot, the helpdesk agent. Right: the employee's tickets with live SLA status.
+ * Clicking a ticket asks the agent about it.
  */
 export default function HomePage() {
-  // Changes every time the agent writes data, so the list on the right reloads.
+  // Changes every time the agent writes data, so the ticket board reloads.
   const [refreshKey, setRefreshKey] = useState(0);
-
-  async function logout() {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/login";
-  }
+  // A prompt sent from outside the chat (clicking a ticket).
+  const [queued, setQueued] = useState<{ text: string; n: number } | null>(null);
 
   return (
     <main className="mx-auto max-w-6xl p-4 md:p-6">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Hackathon Starter</h1>
-          <p className="text-sm text-slate-500">Replace this with your app name and problem statement.</p>
-        </div>
-        <button onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">
-          Log out
-        </button>
-      </header>
+      <AppHeader current="helpdesk" />
       <div className="grid gap-4 md:grid-cols-5">
         <section className="md:col-span-3">
-          <AgentChat onDataChanged={() => setRefreshKey((k) => k + 1)} />
+          <AgentChat queuedPrompt={queued} onDataChanged={() => setRefreshKey((k) => k + 1)} />
         </section>
         <section className="md:col-span-2">
-          <TaskList refreshKey={refreshKey} />
+          <TicketBoard refreshKey={refreshKey} onAsk={(text) => setQueued((q) => ({ text, n: (q?.n ?? 0) + 1 }))} />
         </section>
       </div>
     </main>
