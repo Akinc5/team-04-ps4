@@ -26,25 +26,30 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-lg font-semibold">Enter team passcode</h1>
-        <p className="mt-1 text-sm text-slate-500">This keeps your app and your Gemini quota safe.</p>
+    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+      <form onSubmit={handleSubmit} className="bento-card w-full max-w-sm p-6 sm:p-8">
+        <div className="mb-6 flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent)] text-lg font-black tracking-[-0.08em] text-[#15190f]">
+          d.
+        </div>
+        <p className="eyebrow mb-1">ZENTRIX SOFTWARE</p>
+        <h1 className="text-xl font-semibold tracking-tight">Welcome to DeskBot</h1>
+        <p className="muted mt-2 text-sm leading-6">Enter the team passcode to open the IT helpdesk.</p>
         <input
           type="password"
           value={passcode}
           onChange={(e) => setPasscode(e.target.value)}
-          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+          className="dark-control mt-5 w-full px-3.5 py-3 text-sm outline-none transition focus:border-[#66734d]"
           placeholder="Passcode"
+          aria-label="Team passcode"
           autoFocus
         />
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-sm text-[var(--danger)]">{error}</p>}
         <button
           type="submit"
           disabled={loading || !passcode}
-          className="mt-4 w-full rounded-lg bg-slate-900 px-3 py-2 text-white disabled:opacity-50"
+          className="lime-button mt-4 w-full rounded-xl px-3 py-3 text-sm font-semibold"
         >
-          {loading ? "Checking..." : "Enter"}
+          {loading ? "Checking..." : "Continue →"}
         </button>
       </form>
     </main>

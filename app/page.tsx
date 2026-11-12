@@ -17,13 +17,31 @@ export default function HomePage() {
   const [queued, setQueued] = useState<{ text: string; n: number } | null>(null);
 
   return (
-    <main className="mx-auto max-w-6xl p-4 md:p-6">
+    <main className="mx-auto min-h-screen max-w-[1440px] px-4 pb-8 pt-4 sm:px-7 sm:pt-6 lg:px-10">
       <AppHeader current="helpdesk" />
-      <div className="grid gap-4 md:grid-cols-5">
-        <section className="md:col-span-3">
+      <section className="mb-4 flex flex-col justify-between gap-6 py-5 sm:flex-row sm:items-end sm:py-7">
+        <div>
+          <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
+            IT support, <span className="text-[var(--accent)]">without the back-and-forth.</span>
+          </h2>
+          <p className="muted mt-2 max-w-xl text-sm leading-6">
+            Tell DeskBot what’s going on. Get a trusted fix, or track your request and its SLA in one place.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3 self-start rounded-full border border-[var(--line)] bg-[#101210] px-3 py-2 sm:self-auto">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+            <span className="relative inline-flex size-2 rounded-full bg-[var(--accent)]" />
+          </span>
+          <span className="text-xs font-medium text-[#d9ddd5]">Employee workspace</span>
+        </div>
+      </section>
+
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(390px,0.9fr)]">
+        <section className="min-w-0">
           <AgentChat queuedPrompt={queued} onDataChanged={() => setRefreshKey((k) => k + 1)} />
         </section>
-        <section className="md:col-span-2">
+        <section className="min-w-0">
           <TicketBoard refreshKey={refreshKey} onAsk={(text) => setQueued((q) => ({ text, n: (q?.n ?? 0) + 1 }))} />
         </section>
       </div>

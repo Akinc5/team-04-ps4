@@ -25,18 +25,18 @@ const STATUS_LABEL: Record<string, string> = {
   closed: "Closed",
 };
 const PRIORITY_STYLE: Record<string, string> = {
-  P1: "bg-red-600 text-white",
-  P2: "bg-orange-500 text-white",
-  P3: "bg-amber-100 text-amber-900",
-  P4: "bg-slate-100 text-slate-700",
+  P1: "border-[#633431] bg-[#321d1c] text-[#ff9189]",
+  P2: "border-[#60452a] bg-[#30251a] text-[#f3bd65]",
+  P3: "border-[#596432] bg-[#272d1b] text-[#c5e17c]",
+  P4: "border-[#3c423b] bg-[#222522] text-[#aeb4ac]",
 };
 const SLA_STYLE: Record<string, string> = {
-  breached: "text-red-700",
-  response_overdue: "text-red-700",
-  at_risk: "text-amber-700",
-  on_track: "text-emerald-700",
-  paused: "text-sky-700",
-  done: "text-slate-500",
+  breached: "text-[var(--danger)]",
+  response_overdue: "text-[var(--danger)]",
+  at_risk: "text-[var(--warning)]",
+  on_track: "text-[var(--accent)]",
+  paused: "text-[#92b9da]",
+  done: "text-[#777e76]",
 };
 
 /*
@@ -97,27 +97,34 @@ export default function AdminPage() {
     .sort((a, b) => Number(isOpenP1(b)) - Number(isOpenP1(a)) || order.indexOf(a.sla?.state ?? "done") - order.indexOf(b.sla?.state ?? "done") || a.priority.localeCompare(b.priority));
 
   return (
-    <main className="mx-auto max-w-6xl p-4 md:p-6">
+    <main className="mx-auto min-h-screen max-w-[1440px] px-4 pb-8 pt-4 sm:px-7 sm:pt-6 lg:px-10">
       <AppHeader current="admin" />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <section className="bento-card mb-4 p-5 sm:p-7">
+        <p className="eyebrow mb-2">ZENTRIX SOFTWARE <span className="text-[#555b54]">/</span> OPERATIONS</p>
+        <h2 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">IT Admin board</h2>
+        <p className="muted mt-2 text-sm">Prioritized by incident impact and SLA. Status changes sync to the employee ticket view.</p>
+      </section>
+
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Tile label="Active tickets" value={active.length} />
         <Tile label="Past SLA" value={overdue.length} alert={overdue.length > 0} />
         <Tile label="Open P1" value={active.filter((t) => t.priority === "P1").length} alert={active.some((t) => t.priority === "P1")} />
         <Tile label="Waiting for user" value={active.filter((t) => t.status === "waiting_for_user").length} />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
+      <div className="bento-card">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-4 sm:px-5">
           <div>
-            <h2 className="font-semibold">All tickets</h2>
-            <p className="text-xs text-slate-500">Open P1 first, then worst SLA. Change a status and the employee sees it at once.</p>
+            <p className="eyebrow mb-1">LIVE QUEUE</p>
+            <h2 className="text-lg font-semibold">All tickets</h2>
+            <p className="muted mt-1 text-xs">Open P1 first, then worst SLA.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <select
               value={team}
               onChange={(e) => setTeam(e.target.value)}
-              className="rounded-lg border border-slate-300 px-2 py-1.5"
+              className="dark-control px-3 py-2 text-xs"
               aria-label="Filter by team"
             >
               <option value="all">All teams</option>
@@ -125,39 +132,39 @@ export default function AdminPage() {
                 <option key={t}>{t}</option>
               ))}
             </select>
-            <label className="flex items-center gap-1.5 text-slate-600">
+            <label className="flex items-center gap-1.5 text-xs text-[#a2a79f]">
               <input type="checkbox" checked={showFinished} onChange={(e) => setShowFinished(e.target.checked)} />
               Show finished
             </label>
           </div>
         </div>
 
-        {error && <p className="p-4 text-sm text-red-600">{error}</p>}
-        {!error && visible.length === 0 && <p className="p-4 text-sm text-slate-500">No tickets to show.</p>}
+        {error && <p className="p-4 text-sm text-[var(--danger)]">{error}</p>}
+        {!error && visible.length === 0 && <p className="p-8 text-center text-sm text-[#8b9189]">No tickets to show.</p>}
 
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-[var(--line)]">
           {visible.map((t) => (
             <li key={t.id} className="flex flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
-                <p className="text-sm font-medium">
-                  <span className={`mr-2 rounded px-1.5 py-0.5 text-xs font-semibold ${PRIORITY_STYLE[t.priority] ?? ""}`}>
+                <p className="text-sm font-medium text-[#e8ebe5]">
+                  <span className={`mr-2 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${PRIORITY_STYLE[t.priority] ?? ""}`}>
                     {t.priority}
                   </span>
-                  <span className="text-slate-400">#{t.id}</span> {t.title}
+                  <span className="font-mono text-[11px] text-[#737a71]">#{t.id}</span> {t.title}
                   {t.escalated && (
-                    <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-xs font-normal text-violet-800">escalated</span>
+                    <span className="ml-2 rounded-full border border-[#473769] bg-[#241d35] px-2 py-0.5 text-[10px] font-normal text-[#c1a8ff]">escalated</span>
                   )}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {t.employee} · {t.team} · {t.category} · raised {t.created}
+                <p className="mt-1 text-[11px] text-[#858b83]">
+                  {t.employee} <span className="text-[#4d534c]">·</span> {t.team} <span className="text-[#4d534c]">·</span> {t.category} <span className="text-[#4d534c]">·</span> raised {t.created}
                 </p>
-                {t.sla && <p className={`mt-1 text-xs font-medium ${SLA_STYLE[t.sla.state] ?? ""}`}>{t.sla.state === "paused" ? "Paused: waiting for the employee's reply" : t.sla.summary}</p>}
+                {t.sla && <p className={`mt-1 text-[11px] font-medium ${SLA_STYLE[t.sla.state] ?? ""}`}>{t.sla.state === "paused" ? "Paused: waiting for the employee's reply" : t.sla.summary}</p>}
               </div>
               <select
                 value={t.status}
                 disabled={saving === t.id}
                 onChange={(e) => changeStatus(t.id, e.target.value)}
-                className="shrink-0 rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:opacity-50"
+                className="dark-control shrink-0 px-3 py-2 text-xs disabled:opacity-50"
                 aria-label={`Status of ticket ${t.id}`}
               >
                 {STATUSES.map((s) => (
@@ -176,9 +183,9 @@ export default function AdminPage() {
 
 function Tile({ label, value, alert }: { label: string; value: number; alert?: boolean }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-      <p className={`text-2xl font-semibold ${alert ? "text-red-600" : ""}`}>{value}</p>
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="bento-card px-4 py-4">
+      <p className={`text-2xl font-semibold tracking-tight ${alert ? "text-[var(--danger)]" : "text-[var(--accent)]"}`}>{value}</p>
+      <p className="mt-1 text-[11px] text-[#8b9189]">{label}</p>
     </div>
   );
 }

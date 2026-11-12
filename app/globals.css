@@ -1,5 +1,455 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: dark;
+  --page: #090a09;
+  --panel: #141615;
+  --panel-raised: #191c19;
+  --line: #252925;
+  --text: #f3f5f0;
+  --muted: #898e87;
+  --accent: #adf13d;
+  --accent-dim: #263819;
+  --danger: #ff7774;
+  --warning: #f3bd65;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--page);
+}
+
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply min-h-screen antialiased;
+  background: var(--page);
+  color: var(--text);
+}
+
+::selection {
+  background: var(--accent);
+  color: #10130d;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.bento-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 12%);
+}
+
+.bento-card-soft {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-raised);
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.dark-control {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #101210;
+  color: var(--text);
+}
+
+.dark-control::placeholder {
+  color: #6f756e;
+}
+
+.lime-button {
+  background: var(--accent);
+  color: #13170f;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.lime-button:hover:not(:disabled) {
+  background: #c1ff5b;
+  transform: translateY(-1px);
+}
+
+.lime-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.subtle-scrollbar {
+  scrollbar-color: #3a4039 transparent;
+  scrollbar-width: thin;
+}
+
+.morph-orb-stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 590px;
+  flex: 1;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 34%, rgb(173 241 61 / 7%), transparent 36%),
+    radial-gradient(ellipse at 50% 100%, rgb(255 255 255 / 2%), transparent 55%);
+}
+
+.morph-orb-atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: radial-gradient(rgb(255 255 255 / 11%) 0.6px, transparent 0.6px);
+  background-position: center;
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, #000 0%, transparent 76%);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.morph-orb-center {
+  position: absolute;
+  top: 31%;
+  left: 50%;
+  display: flex;
+  width: min(520px, calc(100% - 32px));
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  transition: top 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.morph-orb {
+  position: relative;
+  display: grid;
+  width: 118px;
+  height: 118px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(222 255 190 / 44%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, #f1ffd8 0%, #b5f25a 10%, #74b82c 27%, #263b17 58%, #101710 78%);
+  box-shadow:
+    inset -12px -16px 27px rgb(0 0 0 / 56%),
+    inset 5px 5px 15px rgb(255 255 255 / 28%),
+    0 0 24px rgb(173 241 61 / 18%),
+    0 0 75px rgb(173 241 61 / 12%);
+  transition: width 550ms cubic-bezier(0.22, 1, 0.36, 1), height 550ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 550ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.morph-orb-core {
+  position: absolute;
+  inset: 17%;
+  border: 1px solid rgb(221 255 188 / 32%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgb(242 255 224 / 72%), rgb(173 241 61 / 16%) 35%, transparent 70%);
+  filter: blur(1px);
+  opacity: 0.72;
+}
+
+.morph-orb-sheen {
+  position: absolute;
+  inset: -35%;
+  border-radius: 50%;
+  background: conic-gradient(from 25deg, transparent 0deg, rgb(220 255 185 / 40%) 68deg, transparent 118deg, transparent 190deg, rgb(174 241 61 / 24%) 235deg, transparent 290deg);
+  animation: morph-orb-spin 9s linear infinite;
+}
+
+.morph-orb-ring {
+  position: absolute;
+  inset: -13%;
+  border: 1px solid rgb(194 239 148 / 20%);
+  border-radius: 50%;
+  transform: rotate(-24deg) scaleY(0.38);
+}
+
+.morph-orb-ring-two {
+  inset: -24%;
+  border-color: rgb(194 239 148 / 13%);
+  transform: rotate(38deg) scaleY(0.44);
+}
+
+.morph-orb-glow {
+  position: absolute;
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  background: rgb(157 236 66 / 16%);
+  filter: blur(36px);
+  transition: opacity 450ms ease, transform 450ms ease;
+}
+
+.morph-orb-caption {
+  margin-top: 25px;
+  color: #a0a69d;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.morph-orb-form {
+  position: absolute;
+  right: 16px;
+  bottom: 25px;
+  left: 16px;
+  z-index: 2;
+  display: flex;
+  width: min(560px, calc(100% - 32px));
+  height: 58px;
+  align-items: center;
+  gap: 12px;
+  margin-inline: auto;
+  padding: 6px 7px 6px 19px;
+  border: 1px solid #333a31;
+  border-radius: 999px;
+  background: rgb(15 17 15 / 94%);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 38%), inset 0 1px rgb(255 255 255 / 3%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.morph-orb-form:focus-within {
+  border-color: #66794b;
+  box-shadow: 0 0 0 3px rgb(173 241 61 / 7%), 0 12px 40px rgb(0 0 0 / 38%);
+}
+
+.morph-orb-spark {
+  flex: none;
+  color: #b6ec6d;
+  font-size: 16px;
+}
+
+.morph-orb-form input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f0f3ec;
+  font-size: 13px;
+}
+
+.morph-orb-form input::placeholder {
+  color: #777e74;
+}
+
+.morph-orb-form input:disabled {
+  opacity: 0.7;
+}
+
+.morph-orb-form button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #343a32;
+  border-radius: 50%;
+  background: #222621;
+  color: #798173;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.morph-orb-form button:enabled {
+  border-color: #b4f35b;
+  background: #b4f35b;
+  color: #14190e;
+}
+
+.morph-orb-form button:enabled:hover {
+  transform: translateY(-1px);
+  background: #c6ff6c;
+}
+
+.morph-orb-form button:disabled {
+  cursor: not-allowed;
+}
+
+.morph-orb-form button svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.morph-orb-answer-wrap {
+  position: absolute;
+  top: calc(100% + 20px);
+  display: flex;
+  width: min(490px, calc(100vw - 72px));
+  max-height: 245px;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  animation: morph-orb-appear 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.morph-orb-answer {
+  width: 100%;
+  max-height: 205px;
+  overflow: auto;
+  padding: 14px 17px;
+  border: 1px solid #333a31;
+  border-radius: 16px;
+  background: rgb(20 23 20 / 95%);
+  box-shadow: 0 12px 38px rgb(0 0 0 / 24%);
+  scrollbar-color: #434b3d transparent;
+  scrollbar-width: thin;
+}
+
+.morph-orb-answer-label {
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.morph-orb-answer-text {
+  color: #e2e7de;
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.morph-orb-error {
+  border-color: #633431;
+}
+
+.morph-orb-error .morph-orb-answer-label {
+  color: var(--danger);
+}
+
+.morph-orb-reset {
+  padding: 4px 10px;
+  color: #a3aa9f;
+  font-size: 11px;
+  transition: color 160ms ease;
+}
+
+.morph-orb-reset:hover {
+  color: var(--accent);
+}
+
+.morph-orb-thinking .morph-orb {
+  animation: morph-orb-breathe 2.2s ease-in-out infinite;
+}
+
+.morph-orb-thinking .morph-orb-glow {
+  opacity: 0.9;
+  transform: scale(1.2);
+}
+
+.morph-orb-answered .morph-orb-center {
+  top: 21%;
+}
+
+.morph-orb-answered .morph-orb {
+  width: 82px;
+  height: 82px;
+}
+
+.morph-orb-answered .morph-orb-glow {
+  width: 130px;
+  height: 130px;
+  opacity: 0.52;
+}
+
+.morph-orb-ellipsis {
+  display: inline-block;
+  width: 15px;
+  text-align: left;
+  animation: morph-orb-dots 1.1s steps(4, end) infinite;
+}
+
+@keyframes morph-orb-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes morph-orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.055); }
+}
+
+@keyframes morph-orb-dots {
+  0%, 20% { opacity: 0; }
+  40% { opacity: 0.5; }
+  60%, 100% { opacity: 1; }
+}
+
+@keyframes morph-orb-appear {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .morph-orb-stage {
+    min-height: 540px;
+  }
+
+  .morph-orb-center {
+    top: 31%;
+  }
+
+  .morph-orb-answered .morph-orb-center {
+    top: 19%;
+  }
+
+  .morph-orb-answer-wrap {
+    top: calc(100% + 13px);
+    width: calc(100vw - 68px);
+    max-height: 230px;
+  }
+
+  .morph-orb-answer {
+    max-height: 190px;
+    padding: 12px 14px;
+  }
+
+  .morph-orb-caption {
+    margin-top: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph-orb *,
+  .morph-orb-ellipsis,
+  .morph-orb-answer-wrap {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .morph-orb-stage *,
+  .morph-orb-stage *::before,
+  .morph-orb-stage *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
