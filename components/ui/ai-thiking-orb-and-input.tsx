@@ -1,8 +1,55 @@
 "use client";
 
+import { Component, type ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 const THINKING_STEPS = ["Thinking", "Searching", "Analyzing", "Composing"];
+
+function SplineLoader() {
+  return (
+    <div className="morph-orb-loading" role="status" aria-label="Loading 3D scene">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
+const Spline = dynamic(() => import("@splinetool/react-spline"), {
+  ssr: false,
+  loading: SplineLoader,
+});
+
+class SplineSceneBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("DeskBot's Spline scene failed to load.", error);
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="morph-orb-fallback" role="status">
+          <span>3D scene unavailable</span>
+          <button type="button" onClick={() => this.setState({ failed: false })}>
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export interface MorphOrbProps {
   onSubmit: (text: string) => Promise<string> | string;
@@ -80,10 +127,20 @@ export default function MorphOrb({
       <div className="morph-orb-center">
         <div className="morph-orb-glow" aria-hidden="true" />
         <div className="morph-orb" role="img" aria-label={phase === "thinking" ? "DeskBot is thinking" : "DeskBot"}>
-          <span className="morph-orb-core" />
-          <span className="morph-orb-sheen" />
-          <span className="morph-orb-ring morph-orb-ring-one" />
-          <span className="morph-orb-ring morph-orb-ring-two" />
+          <SplineSceneBoundary>
+            <Spline
+              scene="https://prod.spline.design/HByP7r9wwg44r9XI/scene.splinecode"
+              className="morph-orb-scene"
+              htmlContentMode="sandbox"
+              renderOnDemand
+              onLoad={(scene) => {
+                scene.setZoom(1.2);
+                scene.setBackgroundColor("#000000");
+              }}
+            >
+              <SplineLoader />
+            </Spline>
+          </SplineSceneBoundary>
         </div>
 
         {phase === "idle" && (
