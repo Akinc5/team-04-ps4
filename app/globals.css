@@ -132,38 +132,49 @@ select:focus-visible {
 
 .morph-orb-center {
   position: absolute;
-  top: 31%;
-  left: 50%;
+  inset: 0 0 96px;
+  z-index: 1;
   display: flex;
-  width: min(520px, calc(100% - 32px));
   flex-direction: column;
   align-items: center;
-  transform: translate(-50%, -50%);
-  transition: top 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  justify-content: flex-end;
+  padding: 20px 16px 12px;
+  pointer-events: none;
+}
+
+.morph-orb-center > * {
+  pointer-events: auto;
 }
 
 .morph-orb {
-  --scene-scale: 0.1966666667;
-  position: relative;
-  display: block;
-  width: 118px;
-  height: 118px;
-  flex: none;
-  overflow: visible;
-  transition: width 550ms cubic-bezier(0.22, 1, 0.36, 1), height 550ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* The 3D scene is the backdrop of the whole Ask DeskBot panel. */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  transition: opacity 500ms ease;
 }
 
 .morph-orb-scene {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 600px !important;
-  height: 600px !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
   background: transparent !important;
+  /* The scene is pink; this recolours it to the lime accent. Black stays black. */
   filter: grayscale(1) sepia(1) saturate(4) hue-rotate(35deg);
-  mix-blend-mode: screen;
-  transform: translate(-50%, -50%) scale(var(--scene-scale));
   transform-origin: center;
+  transition: filter 500ms ease;
+}
+
+.morph-orb::after {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 46%, transparent 42%, rgb(20 22 21 / 88%) 100%),
+    linear-gradient(to bottom, rgb(20 22 21 / 70%) 0%, transparent 16%, transparent 70%, rgb(20 22 21 / 92%) 100%);
+  content: "";
+  pointer-events: none;
 }
 
 .morph-orb-scene canvas {
@@ -174,11 +185,11 @@ select:focus-visible {
 
 .morph-orb-loading,
 .morph-orb-fallback {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  color: #a7b49b;
+  font-size: 12px;
+  text-align: center;
 }
 
 .morph-orb-loading {
@@ -211,24 +222,18 @@ select:focus-visible {
 
 .morph-orb-fallback button {
   color: var(--accent);
-  font-size: 10px;
+  font-size: 12px;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.morph-orb-glow {
-  position: absolute;
-  width: 176px;
-  height: 176px;
-  border-radius: 50%;
-  background: rgb(157 236 66 / 16%);
-  filter: blur(36px);
-  transition: opacity 450ms ease, transform 450ms ease;
-}
-
 .morph-orb-caption {
-  margin-top: 25px;
-  color: #a0a69d;
+  padding: 7px 15px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 999px;
+  background: rgb(10 12 10 / 64%);
+  backdrop-filter: blur(10px);
+  color: #d6dccf;
   font-size: 12px;
   letter-spacing: 0.02em;
   text-align: center;
@@ -321,11 +326,10 @@ select:focus-visible {
 }
 
 .morph-orb-answer-wrap {
-  position: absolute;
-  top: calc(100% + 20px);
   display: flex;
-  width: min(490px, calc(100vw - 72px));
-  max-height: 245px;
+  width: min(560px, 100%);
+  min-height: 0;
+  max-height: 100%;
   flex-direction: column;
   align-items: center;
   gap: 9px;
@@ -334,12 +338,13 @@ select:focus-visible {
 
 .morph-orb-answer {
   width: 100%;
-  max-height: 205px;
+  min-height: 0;
   overflow: auto;
   padding: 14px 17px;
   border: 1px solid #333a31;
   border-radius: 16px;
-  background: rgb(20 23 20 / 95%);
+  background: rgb(13 16 13 / 70%);
+  backdrop-filter: blur(16px) saturate(1.2);
   box-shadow: 0 12px 38px rgb(0 0 0 / 24%);
   scrollbar-color: #434b3d transparent;
   scrollbar-width: thin;
@@ -380,29 +385,14 @@ select:focus-visible {
   color: var(--accent);
 }
 
-.morph-orb-thinking .morph-orb {
+.morph-orb-thinking .morph-orb-scene {
+  filter: grayscale(1) sepia(1) saturate(5) hue-rotate(35deg) brightness(1.25);
   animation: morph-orb-breathe 2.2s ease-in-out infinite;
 }
 
-.morph-orb-thinking .morph-orb-glow {
-  opacity: 0.9;
-  transform: scale(1.2);
-}
-
-.morph-orb-answered .morph-orb-center {
-  top: 21%;
-}
-
 .morph-orb-answered .morph-orb {
-  --scene-scale: 0.1366666667;
-  width: 82px;
-  height: 82px;
-}
-
-.morph-orb-answered .morph-orb-glow {
-  width: 130px;
-  height: 130px;
-  opacity: 0.52;
+  /* Dim the model behind a reply so the text stays readable. */
+  opacity: 0.5;
 }
 
 .morph-orb-ellipsis {
@@ -414,7 +404,7 @@ select:focus-visible {
 
 @keyframes morph-orb-breathe {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.055); }
+  50% { transform: scale(1.06); }
 }
 
 @keyframes morph-orb-loading {
@@ -438,28 +428,10 @@ select:focus-visible {
     min-height: 540px;
   }
 
-  .morph-orb-center {
-    top: 31%;
-  }
-
-  .morph-orb-answered .morph-orb-center {
-    top: 19%;
-  }
-
-  .morph-orb-answer-wrap {
-    top: calc(100% + 13px);
-    width: calc(100vw - 68px);
-    max-height: 230px;
-  }
-
   .morph-orb-answer {
-    max-height: 190px;
     padding: 12px 14px;
   }
 
-  .morph-orb-caption {
-    margin-top: 19px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

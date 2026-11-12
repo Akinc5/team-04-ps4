@@ -124,25 +124,24 @@ export default function MorphOrb({
   return (
     <div className={`morph-orb-stage morph-orb-${phase}`}>
       <div className="morph-orb-atmosphere" aria-hidden="true" />
-      <div className="morph-orb-center">
-        <div className="morph-orb-glow" aria-hidden="true" />
-        <div className="morph-orb" role="img" aria-label={phase === "thinking" ? "DeskBot is thinking" : "DeskBot"}>
-          <SplineSceneBoundary>
-            <Spline
-              scene="https://prod.spline.design/HByP7r9wwg44r9XI/scene.splinecode"
-              className="morph-orb-scene"
-              htmlContentMode="sandbox"
-              renderOnDemand
-              onLoad={(scene) => {
-                scene.setZoom(1.2);
-                scene.setBackgroundColor("#000000");
-              }}
-            >
-              <SplineLoader />
-            </Spline>
-          </SplineSceneBoundary>
-        </div>
+      <div className="morph-orb" role="img" aria-label={phase === "thinking" ? "DeskBot is thinking" : "DeskBot"}>
+        <SplineSceneBoundary>
+          <Spline
+            scene="https://prod.spline.design/HByP7r9wwg44r9XI/scene.splinecode"
+            className="morph-orb-scene"
+            htmlContentMode="sandbox"
+            renderOnDemand
+            onLoad={(scene) => {
+              scene.setBackgroundColor("#000000");
+            }}
+          >
+            <SplineLoader />
+          </Spline>
+        </SplineSceneBoundary>
+      </div>
 
+      {/* Caption and replies sit on top of the 3D scene. */}
+      <div className="morph-orb-center">
         {phase === "idle" && (
           <p className="morph-orb-caption">Ask DeskBot about an IT issue</p>
         )}
